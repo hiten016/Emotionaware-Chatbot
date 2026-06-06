@@ -1,24 +1,35 @@
 # Emotionaware-API-for-LLMs
 
-This project builds an API layer for LLMs that improves responses by adding emotion awareness, intent detection, safety handling, and user feedback learning. It generates more empathetic, safe, and context-aware responses without modifying the base model. The system first analyzes user input to detect emotion and intent (question, rant, help-seeking). Based on this, it dynamically routes and conditions prompts to guide the LLM toward appropriate responses (empathetic tone, safe refusal). A built-in feedback loop collects user ratings and converts them into training data to improve the model. 
+Emotionaware-API-for-LLMs is a production-style API layer for LLMs that enhances responses using emotion awareness, intent detection, safety filtering, and a policy-driven decision engine. It dynamically routes user queries based on emotional and contextual signals to generate empathetic, safe, and contextually appropriate responses without modifying the underlying model.
+
+The system uses a modular architecture consisting of an understanding layer (intent, emotion, safety models), a core decision policy engine that determines response strategy, and an action router that executes LLM calls, safety refusals, or optional retrieval-augmented generation (RAG). A feedback loop collects user ratings and interaction signals to improve future decision-making.
 
 ## System Architecture
 
 ```mermaid
 flowchart LR
 
-A[User Multi-turn Input] --> B[Safety + Intent Classifier]
+A[User Multi-turn Input] --> B[Understanding Layer]
 
-B --> C1[Safe Request Routing]
-B --> C2[Unsafe Detection]
+B --> C1[Intent Detection<br/>Question, Complaint, Request]
+B --> C2[Emotion Detection<br/>Anger, Sadness, Neutral, Joy]
+B --> C3[Safety Classifier<br/>Safe / Unsafe]
 
-C1 --> D[Context Builder]
+C1 --> D
+C2 --> D
+C3 --> D
 
-C2 --> E[Safety Response / Refusal Layer]
+D[Decision Policy]
 
-D --> F[LLM Generator: Qwen3.5 4B]
+D --> E1[Standard Response Path]
+D --> E2[Empathetic Response Path]
+D --> E3[Safety Response / Refusal Path]
 
-F --> G[Output + Logging]
+E1 --> F[Prompt Conditioning Layer]
+E2 --> F
+E3 --> F
 
-G --> H[Feedback Pipeline: 5K+ interactions]
+F --> G[LLM Generator<br/>Qwen 3.5 4B]
+
+G --> H[Final Response]
 ```
