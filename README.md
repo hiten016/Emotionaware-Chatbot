@@ -1,35 +1,41 @@
-# Emotionaware-API-for-LLMs
+# Emotion-based-RAG-decision-System
 
-Emotionaware-API-for-LLMs is a production-style API layer for LLMs that enhances responses using emotion awareness, intent detection, safety filtering, and a policy-driven decision engine. It dynamically routes user queries based on emotional and contextual signals to generate empathetic, safe, and contextually appropriate responses without modifying the underlying model.
+## Objectives
+- Detect user intent from natural language queries.
+- Identify emotional states to enable context-aware response generation.
+- Filter unsafe or harmful inputs using safety classification.
+- Improve factual grounding through hybrid retrieval and reranking.
+- Reduce hallucinations while maintaining response relevance and quality.
+- Build a modular and scalable architecture for real-world conversational AI systems.
+  
+## Approach
 
-The system uses a modular architecture consisting of an understanding layer (intent, emotion, safety models), a core decision policy engine that determines response strategy, and an action router that executes LLM calls, safety refusals, or optional retrieval-augmented generation (RAG). A feedback loop collects user ratings and interaction signals to improve future decision-making.
+The system consists of four major stages:
 
-## System Architecture
+- Understanding Layer
 
-```mermaid
-flowchart LR
+User queries are processed by specialized NLP models:
 
-A[User Multi-turn Input] --> B[Understanding Layer]
+Intent Classification using DeBERTa-v3 fine-tuned on combined dataset(CLINIC, GoEmotion and Toxicity).
 
-B --> C1[Intent Detection<br/>Question, Complaint, Request]
-B --> C2[Emotion Detection<br/>Anger, Sadness, Neutral, Joy]
-B --> C3[Safety Classifier<br/>Safe / Unsafe]
+These models extract semantic, emotional, and safety-related signals from the query.
 
-C1 --> D
-C2 --> D
-C3 --> D
+- Decision Engine
 
-D[Decision Policy]
+A policy-driven decision engine combines outputs from the classifiers and determines the appropriate response strategy:
 
-D --> E1[Standard Response Path]
-D --> E2[Empathetic Response Path]
-D --> E3[Safety Response / Refusal Path]
+Unsafe queries → Safety refusal.
+Knowledge-intensive queries → RAG pipeline.
+General conversational queries → Direct LLM generation.
+- Hybrid Retrieval Pipeline
 
-E1 --> F[Prompt Conditioning Layer]
-E2 --> F
-E3 --> F
+For queries requiring external knowledge:
 
-F --> G[LLM Generator<br/>Qwen 3.5 4B]
+- BM25 retrieves keyword-relevant documents.
+- Dense retrieval performs semantic search using vector embeddings stored in Qdrant.
+- Hybrid retrieval combines sparse and dense retrieval signals.
+-  reranker selects the most relevant documents before generation.
+## Response Generation
 
-G --> H[Final Response]
-```
+The retrieved context, intent label, and emotion signals are passed to Qwen3.5-4B for response generation.
+
